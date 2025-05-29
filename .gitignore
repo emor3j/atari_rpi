@@ -1,0 +1,5 @@
+atari_usb_mouse/atari_usb_mouse
+*.o
+*.code-workspace
+.vscode/
+.continue/

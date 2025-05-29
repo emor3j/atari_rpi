@@ -1,0 +1,19 @@
+{
+  "_comment": "Configuration du simulateur de souris Atari ST",
+  "_description": {
+    "pins_gpio": "Numérotation wiringPi (utilisez 'gpio readall' pour voir la correspondance)",
+    "sensitivity": "Divise les mouvements par cette valeur (1=normal, 2=moitié, etc.)",
+    "monitor_mode": "Active l'affichage temps réel (0=désactivé, 1=activé)",
+    "device_path": "Chemin vers le device de souris (vide pour auto-détection)"
+  },
+  "pins_gpio": {
+    "xa": 27,
+    "xb": 24,
+    "ya": 28,
+    "yb": 25,
+    "left_button": 23,
+    "right_button": 29
+  },
+  "sensitivity": 2,
+  "device_path": "/dev/input/event1"
+}
