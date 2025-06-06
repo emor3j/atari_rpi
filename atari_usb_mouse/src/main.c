@@ -33,7 +33,6 @@
  * Date: 2025-05-29
  */
 
-#include <wiringPi.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -69,12 +68,12 @@ int gpio_initialized = 0;
 
 // Default configuration values
 const config_t default_config = {
-	.pin_xa = 27,
-	.pin_xb = 24,
-	.pin_ya = 28,
-	.pin_yb = 25,
-	.pin_left_button = 23,
-	.pin_right_button = 29,
+	.pin_xa = 16,
+	.pin_xb = 19,
+	.pin_ya = 20,
+	.pin_yb = 26,
+	.pin_left_button = 11,
+	.pin_right_button = 21,
 	.sensitivity = 2,
 	.device_path = ""
 };
@@ -145,13 +144,13 @@ void process_mouse_event(struct input_event *ie, quadrature_state_t *state, int 
                     if (ie->value != 0) {
                         stats.last_x_delta = ie->value;
                         
-                        if (!monitor_mode) {
-                            DEBUG_PRINT("X movement: %d\n", ie->value);
-                        }
-                        
                         int movement = -ie->value / sensitivity;
                         if (movement != 0) {
                             generate_x_pulses(state, movement);
+                        }
+
+                        if (!monitor_mode) {
+                            DEBUG_PRINT("X movement: %d / sensitivity: %d = movement: %d\n", ie->value, sensitivity, movement);
                         }
                         
                         if (monitor_mode) {
@@ -164,13 +163,13 @@ void process_mouse_event(struct input_event *ie, quadrature_state_t *state, int 
                     if (ie->value != 0) {
                         stats.last_y_delta = ie->value;
                         
-                        if (!monitor_mode) {
-                            DEBUG_PRINT("Y movement: %d\n", ie->value);
-                        }
-                        
                         int movement = ie->value / sensitivity;
                         if (movement != 0) {
                             generate_y_pulses(state, movement);
+                        }
+
+                        if (!monitor_mode) {
+                            DEBUG_PRINT("Y movement: %d / sensitivity: %d = movement: %d\n", ie->value, sensitivity, movement);
                         }
                         
                         if (monitor_mode) {
@@ -186,11 +185,11 @@ void process_mouse_event(struct input_event *ie, quadrature_state_t *state, int 
                 case BTN_LEFT:
                     stats.left_button_state = ie->value;
                     
+                    set_left_button(ie->value);
+
                     if (!monitor_mode) {
                         DEBUG_PRINT("Left button: %s\n", ie->value ? "pressed" : "released");
                     }
-                    
-                    digitalWrite(config.pin_left_button, ie->value ? LOW : HIGH);
                     
                     if (monitor_mode) {
                         display_monitor_status(state);
@@ -200,11 +199,11 @@ void process_mouse_event(struct input_event *ie, quadrature_state_t *state, int 
                 case BTN_RIGHT:
                     stats.right_button_state = ie->value;
                     
+                    set_right_button(ie->value);
+
                     if (!monitor_mode) {
                         DEBUG_PRINT("Right button: %s\n", ie->value ? "pressed" : "released");
                     }
-                    
-                    digitalWrite(config.pin_right_button, ie->value ? LOW : HIGH);
                     
                     if (monitor_mode) {
                         display_monitor_status(state);
@@ -610,7 +609,7 @@ int main(int argc, char *argv[]) {
             }
         }
         
-        // Clode fd if open
+        // Close fd if open
         if (fd != -1) {
             close(fd);
             fd = -1;
