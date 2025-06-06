@@ -63,6 +63,19 @@ void generate_x_pulses(quadrature_state_t *state, int delta);
  */
 void generate_y_pulses(quadrature_state_t *state, int delta);
 
+/**
+ * Sets the state of the left button GPIO.
+ *
+ * @param state 1 to press the button, 0 to release it.
+ */
+void set_left_button(int state);
+
+/**
+ * Sets the state of the right button GPIO.
+ *
+ * @param state 1 to press the button, 0 to release it.
+ */
+void set_right_button(int state);
 
 // Flag indicating whether GPIO has been successfully initialized
 extern int gpio_initialized;

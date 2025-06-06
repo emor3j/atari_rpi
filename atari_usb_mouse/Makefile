@@ -4,7 +4,7 @@
 VERSION := 1.0.0
 CC = gcc
 CFLAGS = -DVERSION=\"$(VERSION)\" -Iinclude -Wall -Wextra -O2 -std=c99
-LDFLAGS = -lwiringPi -ljson-c
+LDFLAGS = -lgpiod -ljson-c
 SRCS = $(wildcard src/*.c)
 OBJS = $(SRCS:.c=.o)
 TARGET = atari_usb_mouse
@@ -57,12 +57,12 @@ config:
 	@echo "Creating a sample configuration file..."
 	@echo '{' > $(CONFIG_FILE)
 	@echo '  "pins_gpio": {' >> $(CONFIG_FILE)
-	@echo '    "xa": 27,' >> $(CONFIG_FILE)
-	@echo '    "xb": 24,' >> $(CONFIG_FILE)
-	@echo '    "ya": 28,' >> $(CONFIG_FILE)
-	@echo '    "yb": 25,' >> $(CONFIG_FILE)
-	@echo '    "left_button": 23,' >> $(CONFIG_FILE)
-	@echo '    "right_button": 29' >> $(CONFIG_FILE)
+	@echo '    "xa": 16,' >> $(CONFIG_FILE)
+	@echo '    "xb": 19,' >> $(CONFIG_FILE)
+	@echo '    "ya": 20,' >> $(CONFIG_FILE)
+	@echo '    "yb": 26,' >> $(CONFIG_FILE)
+	@echo '    "left_button": 13,' >> $(CONFIG_FILE)
+	@echo '    "right_button": 21' >> $(CONFIG_FILE)
 	@echo '  },' >> $(CONFIG_FILE)
 	@echo '  "sensitivity": 2,' >> $(CONFIG_FILE)
 	@echo '  "device_path": ""' >> $(CONFIG_FILE)
