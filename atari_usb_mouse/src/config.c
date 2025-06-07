@@ -37,7 +37,14 @@ int load_config(const char *config_path, config_t *cfg) {
 	}
 
 	// Read full file into buffer
-	fread(json_string, 1, file_size, fp);
+	size_t bytes_read = fread(json_string, 1, file_size, fp);
+	if (bytes_read != (size_t)file_size) {
+		ERROR_PRINT("Error reading config file: expected %ld bytes, read %zu bytes\n", file_size, bytes_read);
+		free(json_string);
+		fclose(fp);
+		return -1;
+	}
+
 	json_string[file_size] = '\0';
 	fclose(fp);
 
