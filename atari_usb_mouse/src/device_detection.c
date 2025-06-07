@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+
 #include "device_detection.h"
 #include "global.h"
 #include <stdio.h>

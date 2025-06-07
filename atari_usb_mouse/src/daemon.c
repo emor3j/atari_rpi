@@ -1,3 +1,5 @@
+#define _POSIX_C_SOURCE 200809L
+
 #include "daemon.h"
 #include "global.h"
 #include <stdio.h>
@@ -10,6 +12,7 @@
 #include <errno.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 
 
 char *pidfile_path = "/var/run/atari_usb_mouse.pid";
