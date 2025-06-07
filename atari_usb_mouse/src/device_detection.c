@@ -1,12 +1,13 @@
 #define _GNU_SOURCE
 
-#include "device_detection.h"
-#include "global.h"
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <linux/input.h>
 #include <string.h>
+
+#include "device_detection.h"
+#include "global.h"
 
 
 // Tests whether the device at the given path is a compatible mouse.

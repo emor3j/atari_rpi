@@ -1,9 +1,10 @@
-#include "config.h"
-#include "global.h"
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <json-c/json.h>
+
+#include "config.h"
+#include "global.h"
 
 
 // Loads the configuration from a file.

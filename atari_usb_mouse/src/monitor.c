@@ -4,10 +4,11 @@
  */
 
 
-#include "monitor.h"
-#include "global.h"
 #include <stdio.h>
 #include <time.h>
+
+#include "monitor.h"
+#include "global.h"
 
 
 monitor_stats_t stats = {0};

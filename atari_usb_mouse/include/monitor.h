@@ -2,8 +2,9 @@
 #define MONITOR_H
 
 
-#include "gpio_control.h"
 #include <stddef.h>
+
+#include "gpio_control.h"
 
 
 /**
