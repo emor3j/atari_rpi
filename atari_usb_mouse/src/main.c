@@ -33,6 +33,8 @@
  * Date: 2025-05-29
  */
 
+#define _POSIX_C_SOURCE 200809L
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -72,7 +74,7 @@ const config_t default_config = {
 	.pin_xb = 19,
 	.pin_ya = 20,
 	.pin_yb = 26,
-	.pin_left_button = 11,
+	.pin_left_button = 13,
 	.pin_right_button = 21,
 	.sensitivity = 2,
 	.device_path = ""
@@ -508,6 +510,7 @@ int main(int argc, char *argv[]) {
     // Init GPIO
     DEBUG_PRINT("Initialisation of PIO ports...\n");
     if (init_gpio() < 0) {
+        cleanup_gpio();
         exit(EXIT_FAILURE);
     }
 

@@ -1,4 +1,5 @@
 #define _GNU_SOURCE
+
 #include <stdio.h>
 #include <gpiod.h>
 #include <unistd.h>
@@ -18,15 +19,23 @@
 // GPIO chip device (usually /dev/gpiochip0 on Raspberry Pi)
 #define GPIO_CHIP_DEVICE "/dev/gpiochip0"
 
-
-// GPIO chip and line handles
+// GPIO chip and request handles
 static struct gpiod_chip *chip = NULL;
-static struct gpiod_line *line_xa = NULL;
-static struct gpiod_line *line_xb = NULL;
-static struct gpiod_line *line_ya = NULL;
-static struct gpiod_line *line_yb = NULL;
-static struct gpiod_line *line_left_button = NULL;
-static struct gpiod_line *line_right_button = NULL;
+static struct gpiod_line_request *request = NULL;
+
+// Line offsets array for easier management
+static unsigned int line_offsets[6];
+
+// Line indices for easier reference
+enum {
+    LINE_XA = 0,
+    LINE_XB = 1,
+    LINE_YA = 2,
+    LINE_YB = 3,
+    LINE_LEFT_BUTTON = 4,
+    LINE_RIGHT_BUTTON = 5,
+    NUM_LINES = 6
+};
 
 
 // Quadrature states for forward (clockwise) motion
@@ -39,24 +48,12 @@ static const int quad_states[4][2] = {
 };
 
 
-// Helper function to get and configure a GPIO line
-static struct gpiod_line* setup_output_line(struct gpiod_chip *chip, unsigned int offset, const char *consumer, int initial_value) {
-	struct gpiod_line *line = gpiod_chip_get_line(chip, offset);
-	if (!line) {
-		ERROR_PRINT("Failed to get GPIO line %u\n", offset);
-		return NULL;
-	}
-	
-	if (gpiod_line_request_output(line, consumer, initial_value) < 0) {
-		ERROR_PRINT("Failed to request GPIO line %u as output\n", offset);
-		return NULL;
-	}
-	
-	return line;
-}
-
-// Initializes GPIOs used for quadrature signal generation.
 int init_gpio() {
+	struct gpiod_line_settings *settings = NULL;
+	struct gpiod_line_config *line_config = NULL;
+	struct gpiod_request_config *req_config = NULL;
+	enum gpiod_line_value initial_values[NUM_LINES];
+
 	// Open GPIO chip
 	chip = gpiod_chip_open(GPIO_CHIP_DEVICE);
 	if (!chip) {
@@ -64,26 +61,84 @@ int init_gpio() {
 		return -1;
 	}
 
-	gpio_initialized = 1;
+	// Setup line offsets from config
+	line_offsets[LINE_XA] = config.pin_xa;
+	line_offsets[LINE_XB] = config.pin_xb;
+	line_offsets[LINE_YA] = config.pin_ya;
+	line_offsets[LINE_YB] = config.pin_yb;
+	line_offsets[LINE_LEFT_BUTTON] = config.pin_left_button;
+	line_offsets[LINE_RIGHT_BUTTON] = config.pin_right_button;
+
+	// Set initial values (quadrature lines start at 0, buttons released = 1)
+	initial_values[LINE_XA] = GPIOD_LINE_VALUE_INACTIVE;
+	initial_values[LINE_XB] = GPIOD_LINE_VALUE_INACTIVE;
+	initial_values[LINE_YA] = GPIOD_LINE_VALUE_INACTIVE;
+	initial_values[LINE_YB] = GPIOD_LINE_VALUE_INACTIVE;
+	initial_values[LINE_LEFT_BUTTON] = GPIOD_LINE_VALUE_ACTIVE;   // Button released
+	initial_values[LINE_RIGHT_BUTTON] = GPIOD_LINE_VALUE_ACTIVE;  // Button released
 
 	DEBUG_PRINT("Configuring GPIO ports as OUTPUT\n");
-	
-	// Configure pins as outputs with initial values
-	if ((line_xa = setup_output_line(chip, config.pin_xa, "quadrature_xa", 0)) == NULL)
+
+	// Create line settings for output
+	settings = gpiod_line_settings_new();
+	if (!settings) {
+		ERROR_PRINT("Failed to create line settings\n");
 		return -1;
-	if ((line_xb = setup_output_line(chip, config.pin_xb, "quadrature_xb", 0)) == NULL)
+	}
+
+	if (gpiod_line_settings_set_direction(settings, GPIOD_LINE_DIRECTION_OUTPUT) != 0) {
+		ERROR_PRINT("Failed to set line direction\n");
 		return -1;
-	if ((line_ya = setup_output_line(chip, config.pin_ya, "quadrature_ya", 0)) == NULL)
+	}
+
+	// Create line configuration
+	line_config = gpiod_line_config_new();
+	if (!line_config) {
+		ERROR_PRINT("Failed to create line config\n");
 		return -1;
-	if ((line_yb = setup_output_line(chip, config.pin_yb, "quadrature_yb", 0)) == NULL)
+	}
+
+	// Apply settings to all lines
+	if (gpiod_line_config_add_line_settings(line_config, line_offsets, NUM_LINES, settings) != 0) {
+		ERROR_PRINT("Failed to add line settings to config\n");
 		return -1;
-	if ((line_left_button = setup_output_line(chip, config.pin_left_button, "left_button", 0)) == NULL)
+	}
+
+	// Set initial output values
+	if (gpiod_line_config_set_output_values(line_config, initial_values, NUM_LINES) != 0) {
+		ERROR_PRINT("Failed to set initial output values\n");
 		return -1;
-	if ((line_right_button = setup_output_line(chip, config.pin_right_button, "right_button", 0)) == NULL)
+	}
+
+	// Create request configuration
+	req_config = gpiod_request_config_new();
+	if (!req_config) {
+		ERROR_PRINT("Failed to create request config\n");
 		return -1;
+	}
+
+	// Set consumer name
+	gpiod_request_config_set_consumer(req_config, "quadrature_controller");
+
+	// Request the lines
+	request = gpiod_chip_request_lines(chip, req_config, line_config);
+	if (!request) {
+		ERROR_PRINT("Failed to request GPIO lines\n");
+		return -1;
+	}
+
+	gpio_initialized = 1;
 
 	DEBUG_PRINT("GPIO initialization complete\n");
-	
+
+	// Clean up temporary objects
+	if (settings)
+		gpiod_line_settings_free(settings);
+	if (line_config)
+		gpiod_line_config_free(line_config);
+	if (req_config)
+		gpiod_request_config_free(req_config);
+
 	return 0;
 }
 
@@ -92,50 +147,29 @@ void cleanup_gpio() {
 	if (!gpio_initialized) return;
 
 	DEBUG_PRINT("Cleaning up GPIOs...\n");
-	
-	// Release all GPIO lines
-	if (line_xa) {
-		gpiod_line_set_value(line_xa, 0);
-		gpiod_line_release(line_xa);
-		line_xa = NULL;
+
+	// Set all quadrature lines to 0 and buttons to released (1) before cleanup
+	if (request) {
+		enum gpiod_line_value final_values[NUM_LINES] = {
+			GPIOD_LINE_VALUE_INACTIVE,  // XA
+			GPIOD_LINE_VALUE_INACTIVE,  // XB
+			GPIOD_LINE_VALUE_INACTIVE,  // YA
+			GPIOD_LINE_VALUE_INACTIVE,  // YB
+			GPIOD_LINE_VALUE_ACTIVE,    // Left button released
+			GPIOD_LINE_VALUE_ACTIVE     // Right button released
+		};
+		
+		gpiod_line_request_set_values(request, final_values);
+		gpiod_line_request_release(request);
+		request = NULL;
 	}
-	
-	if (line_xb) {
-		gpiod_line_set_value(line_xb, 0);
-		gpiod_line_release(line_xb);
-		line_xb = NULL;
-	}
-	
-	if (line_ya) {
-		gpiod_line_set_value(line_ya, 0);
-		gpiod_line_release(line_ya);
-		line_ya = NULL;
-	}
-	
-	if (line_yb) {
-		gpiod_line_set_value(line_yb, 0);
-		gpiod_line_release(line_yb);
-		line_yb = NULL;
-	}
-	
-	if (line_left_button) {
-		gpiod_line_set_value(line_left_button, 1);  // Boutons relâchés
-		gpiod_line_release(line_left_button);
-		line_left_button = NULL;
-	}
-	
-	if (line_right_button) {
-		gpiod_line_set_value(line_right_button, 1);
-		gpiod_line_release(line_right_button);
-		line_right_button = NULL;
-	}
-	
+
 	// Close GPIO chip
 	if (chip) {
 		gpiod_chip_close(chip);
 		chip = NULL;
 	}
-	
+
 	gpio_initialized = 0;
 	DEBUG_PRINT("GPIO cleanup complete\n");
 }
@@ -144,10 +178,12 @@ void cleanup_gpio() {
 void set_x_quadrature(quadrature_state_t *state, int xa, int xb) {
 	state->xa_state = xa;
 	state->xb_state = xb;
-	
-	if (line_xa && line_xb) {
-		gpiod_line_set_value(line_xa, xa);
-		gpiod_line_set_value(line_xb, xb);
+
+	if (request) {
+		gpiod_line_request_set_value(request, line_offsets[LINE_XA], 
+			xa ? GPIOD_LINE_VALUE_ACTIVE : GPIOD_LINE_VALUE_INACTIVE);
+		gpiod_line_request_set_value(request, line_offsets[LINE_XB], 
+			xb ? GPIOD_LINE_VALUE_ACTIVE : GPIOD_LINE_VALUE_INACTIVE);
 	}
 }
 
@@ -155,10 +191,12 @@ void set_x_quadrature(quadrature_state_t *state, int xa, int xb) {
 void set_y_quadrature(quadrature_state_t *state, int ya, int yb) {
 	state->ya_state = ya;
 	state->yb_state = yb;
-	
-	if (line_ya && line_yb) {
-		gpiod_line_set_value(line_ya, ya);
-		gpiod_line_set_value(line_yb, yb);
+
+	if (request) {
+		gpiod_line_request_set_value(request, line_offsets[LINE_YA], 
+			ya ? GPIOD_LINE_VALUE_ACTIVE : GPIOD_LINE_VALUE_INACTIVE);
+		gpiod_line_request_set_value(request, line_offsets[LINE_YB], 
+			yb ? GPIOD_LINE_VALUE_ACTIVE : GPIOD_LINE_VALUE_INACTIVE);
 	}
 }
 
@@ -192,7 +230,7 @@ void generate_x_pulses(quadrature_state_t *state, int delta) {
 
 		DEBUG_PRINT("direction: %d,X phase: %d, pulses: %d, delay: %d\n", direction, state->x_phase, pulses, delay);
 
-		usleep(MAX_DELAY);
+		usleep(delay);
 	}
 }
 
@@ -217,20 +255,24 @@ void generate_y_pulses(quadrature_state_t *state, int delta) {
 
 		DEBUG_PRINT("direction: %d,Y phase: %d, pulses: %d, delay: %d\n", direction, state->y_phase, pulses, delay);
 
-		usleep(MAX_DELAY);
+		usleep(delay);
 	}
 }
 
 // Sets the left button state (0 = pressed, 1 = released)
 void set_left_button(int pressed) {
-	if (line_left_button) {
-		gpiod_line_set_value(line_left_button, pressed ? 0 : 1);
+	if (request) {
+		enum gpiod_line_value value = pressed ? GPIOD_LINE_VALUE_INACTIVE : GPIOD_LINE_VALUE_ACTIVE;
+		int result = gpiod_line_request_set_value(request, line_offsets[LINE_LEFT_BUTTON], value);
+		DEBUG_PRINT("Left button: pressed=%d, gpio_value=%d, result=%d\n", pressed, value, result);
 	}
 }
 
 // Sets the right button state (0 = pressed, 1 = released)
 void set_right_button(int pressed) {
-	if (line_right_button) {
-		gpiod_line_set_value(line_right_button, pressed ? 0 : 1);
+	if (request) {
+		enum gpiod_line_value value = pressed ? GPIOD_LINE_VALUE_INACTIVE : GPIOD_LINE_VALUE_ACTIVE;
+		int result = gpiod_line_request_set_value(request, line_offsets[LINE_RIGHT_BUTTON], value);
+		DEBUG_PRINT("Right button: pressed=%d, gpio_value=%d, result=%d\n", pressed, value, result);
 	}
 }
