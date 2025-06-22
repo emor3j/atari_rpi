@@ -1,0 +1,11 @@
+#!/bin/sh
+set -e
+
+case "$1" in
+    purge)
+        # Nettoyer les fichiers de runtime si ils existent
+        rm -rf /run/atari-rpi || true
+        ;;
+esac
+
+#DEBHELPER#

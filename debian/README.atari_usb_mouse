@@ -1,0 +1,140 @@
+# atari_usb_mouse - USB Mouse to Atari ST Interface
+
+## Description
+
+`atari_usb_mouse` converts USB mouse events into quadrature signals compatible 
+with Atari ST mouse ports. The program reads USB mouse movements and button 
+presses, then generates the appropriate signals on Raspberry Pi GPIO pins to 
+simulate an Atari ST mouse.
+
+## How It Works
+
+The Atari ST mouse uses quadrature encoding for movement detection:
+- XA/XB pins provide X-axis movement signals
+- YA/YB pins provide Y-axis movement signals  
+- Button pins provide mouse button states
+
+The program translates USB HID mouse events into these quadrature signals in 
+real-time, allowing seamless use of modern USB mice with vintage Atari ST systems.
+
+## Hardware Setup
+
+### Required Connections
+
+Connect the following Raspberry Pi GPIO pins to your DB9 Atari ST mouse port:
+
+- XA signal (default GPIO 16) → DB9 pin 2
+- XB signal (default GPIO 19) → DB9 pin 1
+- YA signal (default GPIO 20) → DB9 pin 3 
+- YB signal (default GPIO 26) → DB9 pin 4
+- Left button (default GPIO 13) → DB9 pin 6
+- Right button (default GPIO 21) → DB9 pin 9
+- Ground → DB9 pin 8
+
+DB9 pin 5 and 7 are not used.
+
+**Important:** DB9 pin 5 provide Atari ST 5V. DO NOT CONNECT IT TO GPIO.
+
+**Important:** Use 330 ohm resistors between GPIO and DB9 pins to limit current.
+
+## Configuration
+
+### Default Configuration
+
+The program includes sensible defaults for GPIO pin assignments. Use the `-C` 
+option to display current configuration.
+
+### Custom Configuration
+
+Create a JSON configuration file based on the example:
+```
+cp /usr/share/doc/atari-rpi/atari_usb_mouse-config.json.ex /etc/atari_rpi/atari_usb_mouse.json
+```
+
+Edit the file to match your hardware setup.
+
+### Configuration Options
+
+- GPIO pin assignments for all signals
+- Mouse sensitivity settings
+- Device path specifications
+- Daemon mode settings
+
+## Usage
+
+### Basic Usage
+```
+atari_usb_mouse
+```
+The program will automatically detect your USB mouse and start converting events.
+
+### With Configuration File
+```
+atari_usb_mouse -c /path/to/config.json
+```
+
+### Debug Mode
+```
+atari_usb_mouse --debug
+```
+Shows detailed information about mouse events and GPIO operations.
+
+### Monitor Mode
+```
+atari_usb_mouse --monitor
+```
+Displays real-time GPIO states and mouse events for troubleshooting.
+
+### Daemon Mode
+```
+atari_usb_mouse --daemon
+```
+Runs as a background service. Use `--status`, `--restart`, or `--kill` to control.
+
+## Troubleshooting
+
+### Device Detection Issues
+- Check USB mouse is connected and detected: `lsusb`
+- Verify input devices: `ls /dev/input/event*`
+- Use `-D` option to specify device manually
+
+### Permission Issues
+- Ensure user is in gpio and input groups:
+  ```
+  sudo usermod -a -G gpio,input $USER
+  ```
+- Log out and back in for group changes to take effect
+
+### GPIO Issues
+- Verify GPIO pins are not used by other processes
+- Check hardware connections
+- Use `--monitor` mode to verify GPIO state changes
+
+## Advanced Usage
+
+### Custom Pin Assignment
+```
+atari_usb_mouse --pin-xa 18 --pin-xb 19 --pin-ya 20 --pin-yb 21
+```
+
+### Sensitivity Adjustment
+```
+atari_usb_mouse --sensitivity 2  # Half sensitivity
+```
+
+### Specific Device
+```
+atari_usb_mouse --device /dev/input/event1
+```
+
+## Technical Details
+
+The program implements quadrature encoding by generating phase-shifted pulses 
+on the XA/XB and YA/YB pin pairs. Movement direction is determined by the 
+phase relationship between these signals, while movement distance is 
+proportional to pulse frequency.
+
+## See Also
+
+- `man atari_usb_mouse` - Complete manual page
+- `/usr/share/doc/atari-rpi/atari_usb_mouse-config.json.ex` - Configuration example

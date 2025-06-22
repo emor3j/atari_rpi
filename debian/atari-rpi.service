@@ -1,0 +1,28 @@
+[Unit]
+Description=USB to Atari mouse adapter daemon
+Documentation=man:atari_usb_mouse(1)
+After=multi-user.target
+Wants=multi-user.target
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/atari_usb_mouse --config /etc/atari_rpi/atari_usb_mouse.json --daemon --pidfile /run/atari-rpi/atari_usb_mouse.pid
+ExecStop=/usr/bin/atari_usb_mouse --kill
+ExecReload=/usr/bin/atari_usb_mouse --restart
+Restart=always
+RestartSec=5
+User=root
+Group=root
+
+# Configuration
+WorkingDirectory=/
+RuntimeDirectory=atari-rpi
+RuntimeDirectoryMode=0755
+PIDFile=/run/atari-rpi/atari_usb_mouse.pid
+
+# Limites de sécurité
+NoNewPrivileges=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target

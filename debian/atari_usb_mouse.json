@@ -1,0 +1,12 @@
+{
+	"pins_gpio": {
+	  "xa": 16,
+	  "xb": 19,
+	  "ya": 20,
+	  "yb": 26,
+	  "left_button": 13,
+	  "right_button": 21
+	},
+	"sensitivity": 2,
+	"device_path": ""
+}

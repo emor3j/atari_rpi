@@ -1,0 +1,31 @@
+Source: atari-rpi
+Section: misc
+Priority: optional
+Maintainer: Jérôme SONRIER <jsid@emor3j.fr.eu.org>
+Rules-Requires-Root: no
+Build-Depends:
+ debhelper-compat (= 13),
+ libjson-c-dev,
+ libgpiod-dev (>= 2),
+Standards-Version: 4.6.2
+Homepage: https://github.com/emor3j/atari_rpi
+Vcs-Browser: https://github.com/emor3j/atari_rpi/tree/debian/latest
+Vcs-Git: https://github.com/emor3j/atari_rpi -b debian/latest
+
+Package: atari-rpi
+Architecture: any
+Pre-Depends: ${misc:Pre-Depends}
+Depends:
+ ${shlibs:Depends},
+ ${misc:Depends},
+ libgpiod3,
+ libjson-c5,
+Description: USB to Atari mouse adapter for Raspberry Pi
+ This package provides a USB to Atari mouse adapter that allows modern USB
+ mice to work with Atari computers. The program reads USB mouse events and
+ converts them to Atari-compatible signals output through the Raspberry Pi's
+ GPIO pins.
+ .
+ The adapter handles mouse movement and button clicks, making it possible to
+ use contemporary USB mice with vintage Atari systems that expect the original
+ Atari mouse protocol.

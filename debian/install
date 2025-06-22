@@ -1,0 +1,13 @@
+# Documentation files
+#debian/README usr/share/doc/atari-rpi/
+#debian/atari_usb_mouse.README usr/share/doc/atari-rpi/
+#atari_usb_mouse/doc/config.json usr/share/doc/atari-rpi/
+
+# Manual pages
+debian/atari_usb_mouse.1 usr/share/man/man1/
+
+# Config files
+debian/atari_usb_mouse.json etc/atari_rpi/
+
+# Binaries
+atari_usb_mouse/atari_usb_mouse usr/bin/

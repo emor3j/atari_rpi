@@ -1,0 +1,135 @@
+.TH ATARI_USB_MOUSE 1 "2025" "atari-rpi" "User Commands"
+.SH NAME
+atari_usb_mouse \- Atari ST mouse simulator using GPIO
+.SH SYNOPSIS
+.B atari_usb_mouse
+[\fIOPTIONS\fR]
+.SH DESCRIPTION
+.B atari_usb_mouse
+reads USB mouse events and converts them into quadrature signals compatible 
+with Atari ST mouse ports. The program translates mouse movements and button 
+presses into appropriate GPIO signals on Raspberry Pi, allowing modern USB 
+mice to be used with original Atari ST hardware.
+
+The program implements quadrature encoding by generating phase-shifted pulses 
+on GPIO pin pairs, with movement direction determined by phase relationship 
+and distance proportional to pulse frequency.
+.SH OPTIONS
+.TP
+.BR \-c ", " \-\-config " " \fIFILE\fR
+Use JSON configuration file \fIFILE\fR for program settings including GPIO 
+pin assignments and sensitivity options.
+.TP
+.BR \-C
+Display current configuration settings and exit.
+.TP
+.BR \-d ", " \-\-debug
+Enable debug messages showing detailed information about mouse events and 
+GPIO operations.
+.TP
+.BR \-D ", " \-\-device " " \fIDEVICE\fR
+Specify input device path (e.g. /dev/input/event1). If not specified, 
+the program will automatically detect the first available USB mouse device.
+.TP
+.BR \-m ", " \-\-monitor
+Show real-time GPIO states and mouse event status for troubleshooting 
+hardware connections and signal timing.
+.TP
+.BR \-s ", " \-\-sensitivity " " \fIN\fR
+Set mouse sensitivity multiplier. 1 = normal sensitivity, 2 = half 
+sensitivity, 0.5 = double sensitivity, etc.
+.TP
+.BR \-\-pin\-xa " " \fIN\fR
+Set GPIO pin number for XA quadrature signal (X-axis phase A).
+.TP
+.BR \-\-pin\-xb " " \fIN\fR
+Set GPIO pin number for XB quadrature signal (X-axis phase B).
+.TP
+.BR \-\-pin\-ya " " \fIN\fR
+Set GPIO pin number for YA quadrature signal (Y-axis phase A).
+.TP
+.BR \-\-pin\-yb " " \fIN\fR
+Set GPIO pin number for YB quadrature signal (Y-axis phase B).
+.TP
+.BR \-\-pin\-bleft " " \fIN\fR
+Set GPIO pin number for left mouse button signal.
+.TP
+.BR \-\-pin\-bright " " \fIN\fR
+Set GPIO pin number for right mouse button signal.
+.TP
+.BR \-b ", " \-\-daemon
+Run as a background daemon process.
+.TP
+.BR \-p ", " \-\-pidfile " " \fIFILE\fR
+Specify PID file path for daemon mode. If not specified, uses default 
+system location.
+.TP
+.BR \-k ", " \-\-kill
+Stop running daemon process.
+.TP
+.BR \-r ", " \-\-restart
+Restart daemon process.
+.TP
+.BR \-t ", " \-\-status
+Show current daemon status.
+.TP
+.BR \-v ", " \-\-version
+Print version information and exit.
+.TP
+.BR \-h ", " \-\-help
+Show help message with all available options and exit.
+.SH FILES
+.TP
+.I /etc/atari_rpi/atari_usb_mouse.json
+System-wide configuration file.
+.SH EXAMPLES
+.TP
+Run with automatic USB mouse detection:
+.B atari_usb_mouse
+.TP
+Run with custom configuration file:
+.B atari_usb_mouse \-c ~/.config/atari_usb_mouse.json
+.TP
+Run as daemon with debug output:
+.B atari_usb_mouse \-\-daemon \-\-debug
+.TP
+Monitor real-time GPIO and mouse activity:
+.B atari_usb_mouse \-\-monitor
+.TP
+Use specific mouse device with custom sensitivity:
+.B atari_usb_mouse \-D /dev/input/event2 \-s 0.5
+.TP
+Set custom GPIO pins for all signals:
+.B atari_usb_mouse \-\-pin\-xa 18 \-\-pin\-xb 19 \-\-pin\-ya 20 \-\-pin\-yb 21
+.TP
+Check daemon status:
+.B atari_usb_mouse \-\-status
+.SH HARDWARE SETUP
+The program requires proper wiring between Raspberry Pi GPIO pins and the 
+Atari ST mouse port.
+
+Standard Atari ST mouse port pinout should be consulted for correct wiring. 
+Ground connections are essential for proper signal integrity.
+.SH PERMISSIONS
+The program requires access to GPIO hardware and input devices. Users must 
+be members of the 'gpio' and 'input' groups:
+
+.B sudo usermod \-a \-G gpio,input $USER
+
+Log out and back in for group membership changes to take effect.
+.SH NOTES
+If no device is specified with \-D, the program will automatically scan 
+/dev/input/event* devices to find the first available USB mouse.
+
+The quadrature encoding generates direction-sensitive pulse trains where 
+the phase relationship between A and B signals determines movement direction, 
+and pulse frequency determines movement speed.
+
+For troubleshooting hardware issues, use the \-\-monitor option to observe 
+real-time GPIO state changes and verify proper signal generation.
+.SH AUTHOR
+Written by Jérôme SONRIER <jsid@emor3j.fr.eu.org>.
+.SH SEE ALSO
+.BR gpio (1),
+.BR systemd (1)
+.BR lsusb (8)

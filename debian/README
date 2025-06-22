@@ -1,0 +1,63 @@
+# Atari RPI Project
+
+## Overview
+
+The Atari RPI project provides modern hardware interfaces for classic Atari ST 
+platforms using Raspberry Pi GPIO capabilities. This project bridges the gap 
+between vintage Atari ST systems and contemporary peripherals, allowing users 
+to enhance their retro computing experience with modern convenience.
+
+## Project Components
+
+### atari_usb_mouse
+Converts USB mouse events into quadrature signals compatible with Atari ST 
+mouse ports. This utility allows you to use modern USB mice with original 
+Atari ST hardware by translating mouse movements and button presses into 
+the appropriate GPIO signals.
+
+## Hardware Requirements
+
+- Raspberry Pi (any model with GPIO support)
+- Atari ST system
+- Appropriate wiring/interface between Raspberry Pi GPIO and Atari ST ports
+- USB peripherals (mouse, etc.)
+
+## System Requirements
+
+- Raspberry Pi OS or compatible Linux distribution
+- GPIO access permissions
+- Input device access permissions
+
+## Installation
+
+This package provides the necessary utilities and documentation. Individual 
+applications can be run directly or configured as system services.
+
+## Applications
+
+### atari_usb_mouse
+See `/usr/share/doc/atari-rpi/atari_usb_mouse.README` for detailed information 
+about USB mouse support.
+
+Manual page: `man atari_usb_mouse`
+
+## Configuration
+
+Each application provides example configuration files in JSON format. These 
+can be found in `/usr/share/doc/atari-rpi/` with the `.ex` extension.
+
+Copy and modify these files according to your hardware setup and requirements.
+
+## Support and Documentation
+
+- Application-specific README files: `/usr/share/doc/atari-rpi/`
+- Manual pages: `man <application_name>`
+- Configuration examples: `/usr/share/doc/atari-rpi/`
+
+## Author
+
+Jérôme SONRIER <jsid@emor3j.fr.eu.org>
+
+## License
+
+GPL3+

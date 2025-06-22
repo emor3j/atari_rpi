@@ -1,0 +1,12 @@
+Document: atari-rpi
+Title: Atari RPI Project Documentation
+Author: Jérôme SONRIER <jsid@emor3j.fr.eu.org>
+Abstract: Documentation for atari-rpi project, providing modern hardware interfaces
+ for Atari ST platforms using Raspberry Pi GPIO. The project includes utilities
+ to connect USB devices and other modern peripherals to classic Atari ST systems.
+Section: System/Hardware
+
+Format: text
+Files: /usr/share/doc/atari-rpi/README
+       /usr/share/doc/atari-rpi/README.atari_usb_mouse
+       /usr/share/doc/atari-rpi/config.json
