@@ -1,3 +1,9 @@
+Description: Fix hardening flags
+Author: Jérôme SONRIER <jsid@emor3j.fr.eu.org>
+Applied-Upstream: https://github.com/emor3j/atari_rpi/commit/a1be0178350c704e7b8a3594f269b85b8437f1c5
+Last-Update: 2025-06-26
+
+
 Index: atari_rpi/atari_usb_mouse/Makefile
 ===================================================================
 --- atari_rpi.orig/atari_usb_mouse/Makefile
