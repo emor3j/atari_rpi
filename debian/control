@@ -7,7 +7,7 @@ Build-Depends:
  debhelper-compat (= 13),
  libjson-c-dev,
  libgpiod-dev (>= 2),
-Standards-Version: 4.6.2
+Standards-Version: 4.7.2
 Homepage: https://github.com/emor3j/atari_rpi
 Vcs-Browser: https://github.com/emor3j/atari_rpi/tree/debian/latest
 Vcs-Git: https://github.com/emor3j/atari_rpi -b debian/latest
