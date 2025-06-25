@@ -3,8 +3,18 @@
 # Variables
 VERSION := 1.0.0
 CC = gcc
-CFLAGS = -DVERSION=\"$(VERSION)\" -Iinclude -Wall -Wextra -O2 -std=c99
-LDFLAGS = -lgpiod -ljson-c
+
+CPPFLAGS ?= $(shell dpkg-buildflags --get CPPFLAGS 2>/dev/null || true)
+CFLAGS ?= $(shell dpkg-buildflags --get CFLAGS 2>/dev/null || true)
+LDFLAGS ?= $(shell dpkg-buildflags --get LDFLAGS 2>/dev/null || true)
+
+ifeq ($(CFLAGS),)
+CFLAGS = -Wall -Wextra -O2 -std=c99
+endif
+
+CFLAGS += -DVERSION=\"$(VERSION)\" -Iinclude
+LDFLAGS += -lgpiod -ljson-c
+
 SRCS = $(wildcard src/*.c)
 OBJS = $(SRCS:.c=.o)
 TARGET = atari_usb_mouse
