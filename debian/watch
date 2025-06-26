@@ -1,2 +1,2 @@
 version=4
-https://github.com/emor3j/atari_rpi/tags .*/v?(\d.*)@ARCHIVE_EXT@
+https://github.com/emor3j/atari_rpi/tags .*/v(\d.*)@ARCHIVE_EXT@
