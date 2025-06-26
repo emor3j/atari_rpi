@@ -1,3 +1,12 @@
+atari-rpi (1.0-2) unstable; urgency=medium
+
+  * Add source package generation
+  * Add debian/watch file
+  * Use lastest standards version
+  * Add patch description
+
+ -- Jérôme SONRIER <jsid@emor3j.fr.eu.org>  Thu, 26 Jun 2025 02:03:29 +0200
+
 atari-rpi (1.0-1) unstable; urgency=medium
 
   * Initial release. (closes: #1108013)
